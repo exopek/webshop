@@ -1,0 +1,33 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    
+    "build:tenant1": "node -r dotenv/config ./node_modules/.bin/nuxt build dotenv_config_path=.env.tenant1",
+    "build:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt build dotenv_config_path=.env.tenant2",
+    
+    "generate:tenant1": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant1",
+    "generate:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant2",
+    
+    "dev:tenant1": "node -r dotenv/config ./node_modules/.bin/nuxt dev dotenv_config_path=.env.tenant1",
+    "dev:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt dev dotenv_config_path=.env.tenant2"
+  },
+  "dependencies": {
+    "@builder.io/sdk-vue": "^4.0.3",
+    "nuxt": "^3.15.4",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610",
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.13.1",
+    "@pinia/nuxt": "^0.10.1",
+    "pinia": "^3.0.1"
+  }
+}
