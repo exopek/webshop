@@ -1,7 +1,7 @@
 // stores/shopify.ts
 import { defineStore } from 'pinia'
 import { useRuntimeConfig } from 'nuxt/app'
-import type { ShopifyProduct } from '~/types/domain/shopify'
+import type { ProductFilterOptions, ShopifyProduct } from '~/types/domain/shopify'
 
 interface ShopifyState {
   products: Map<string, ShopifyProduct>;
@@ -39,11 +39,13 @@ export const useShopifyStore = defineStore('shopifyStore', {
     async getShopifyConfig() {
       const config = useRuntimeConfig()
       const tenantId = config.public.TENANT_ID
+      console.log('Tenant ID:', tenantId)
+      console.log('Shopify config:', config.public.shopify)
       
       return {
-        shopifyDomain: config.public.shopify.domain || '',
-        shopifyAccessToken: config.shopifyAccessToken || '',
-        shopifyApiVersion: config.public.shopify.apiVersion || '2023-10'
+        shopifyDomain: config.public.shopify.domain || 'flash-reflex-training.myshopify.com',
+        shopifyAccessToken: config.shopifyAccessToken || '0c54fa2544bf3c6ce9b1fe8d03e79f5e',
+        shopifyApiVersion: config.public.shopify.apiVersion || '2025-01'
       }
     },
 
@@ -250,6 +252,205 @@ export const useShopifyStore = defineStore('shopifyStore', {
       this.collections.set(cacheKey, products)
       
       return products
+    },
+
+    async fetchProducts(options: ProductFilterOptions = {}): Promise<ShopifyProduct[]> {
+      // Default-Werte
+      const {
+        minPrice = 0,
+        maxPrice = 1000000,
+        available = undefined,
+        sortBy = 'price-desc',
+        filterQuery = '',
+        tags = [],
+        productType = '',
+        limit = 10,
+        cursor = ''
+      } = options;
+    
+      // Cache-Schlüssel basierend auf Filteroptionen generieren
+      const cacheKey = `all_products_${minPrice}_${maxPrice}_${available}_${sortBy}_${filterQuery}_${tags.join('_')}_${productType}_${limit}_${cursor}`;
+      
+      // Prüfen auf Cache-Treffer
+      if (this.collections.has(cacheKey)) {
+        return this.collections.get(cacheKey) as ShopifyProduct[];
+      }
+      
+      // Sortierungsoption für GraphQL umwandeln
+      let sortKey, reverse;
+      switch (sortBy) {
+        case 'price-asc':
+          sortKey = 'PRICE';
+          reverse = false;
+          break;
+        case 'price-desc':
+          sortKey = 'PRICE';
+          reverse = true;
+          break;
+        case 'title-asc':
+          sortKey = 'TITLE';
+          reverse = false;
+          break;
+        case 'title-desc':
+          sortKey = 'TITLE';
+          reverse = true;
+          break;
+        case 'created-desc':
+          sortKey = 'CREATED_AT';
+          reverse = true;
+          break;
+        case 'created-asc':
+          sortKey = 'CREATED_AT';
+          reverse = false;
+          break;
+        default:
+          sortKey = 'RELEVANCE';
+          reverse = false;
+      }
+      
+      // Filter für Verfügbarkeit
+      let availabilityFilter = '';
+      if (available !== undefined) {
+        availabilityFilter = `, availableForSale: ${available}`;
+      }
+      
+      // Filter für Tags
+      let tagsFilter = '';
+      if (tags.length > 0) {
+        tagsFilter = `, tag: "${tags[0]}"`;
+      }
+      
+      // Filter für Produkttyp
+      let productTypeFilter = '';
+      if (productType) {
+        productTypeFilter = `, productType: "${productType}"`;
+      }
+      
+      // Pagination mit Cursor
+      let afterCursor = '';
+      if (cursor) {
+        afterCursor = `, after: "${cursor}"`;
+      }
+      
+      // GraphQL-Abfrage mit allen Filtern
+      const query = `
+        query getProducts(
+          $numProducts: Int!
+        ) {
+          products(
+            first: $numProducts
+            sortKey: ${sortKey}
+            reverse: ${reverse}
+            ${afterCursor}
+            ${availabilityFilter}
+            ${tagsFilter}
+            ${productTypeFilter}
+          ) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                id
+                title
+                description
+                handle
+                productType
+                tags
+                createdAt
+                featuredImage {
+                  url
+                  altText
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                  maxVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+                compareAtPriceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+                variants(first: 1) {
+                  edges {
+                    node {
+                      id
+                      price {
+                      amount
+                      currencyCode
+                    }
+                      compareAtPrice {
+                      amount
+                      currencyCode
+                    }
+                      availableForSale
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+      
+      // Suchquery erstellen
+      let searchQuery = query ? `title:*${query}*` : '';
+      
+      // Preisfilter hinzufügen
+      if (minPrice > 0 || maxPrice < 1000000) {
+        const priceQuery = `variants.price:>=${minPrice} variants.price:<=${maxPrice}`;
+        searchQuery = searchQuery ? `${searchQuery} AND ${priceQuery}` : priceQuery;
+      }
+      
+      // API-Anfrage senden
+      const response = await this.shopifyFetch(query, {
+        query: searchQuery,
+        numProducts: limit
+      });
+
+      console.log('Shopify response:', response);
+      
+      if (!response?.data?.products?.edges) {
+        return [];
+      }
+      
+      // Pagination-Informationen extrahieren
+      const pageInfo = response.data.products.pageInfo;
+      
+      // Produktdaten transformieren
+      const products = response.data.products.edges.map(({ node }: any) => {
+        const firstVariant = node.variants.edges[0]?.node;
+        
+        const product: ShopifyProduct = {
+          id: node.id,
+          title: node.title,
+          description: node.description,
+          handle: node.handle,
+          featured_image: node.featuredImage?.url,
+          price: parseFloat(firstVariant?.price || 0),
+          compare_at_price: parseFloat(firstVariant?.compareAtPrice || 0),
+          on_sale: firstVariant?.compareAtPrice && parseFloat(firstVariant.compareAtPrice) > parseFloat(firstVariant.price),
+          available: firstVariant?.availableForSale || false,
+        };
+        
+        // Produkt auch im Produkt-Cache speichern
+        this.products.set(product.id, product);
+        
+        return product;
+      });
+      
+      // Im Collection-Cache speichern
+      this.collections.set(cacheKey, products);
+      
+      return products;
     },
 
     /**

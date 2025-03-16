@@ -7,8 +7,10 @@
     </div>
     <template v-else>
       <div v-for="product in products" :key="product.id" class="product-item">
+        <ProductCard :product="product" :api-key="apiKey" :model="model" />
+         
         <!-- Hier können Sie eine ProductCard-Komponente einfügen oder direkt das Produkt anzeigen -->
-        <div class="product-card">
+        <!-- <div class="product-card">
           <div class="product-image">
             <img
               :src="product.featured_image || '/images/placeholder.jpg'"
@@ -26,7 +28,7 @@
               }}</span>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </template>
   </div>
@@ -35,12 +37,14 @@
   <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
-import { useShopifyStore } from "~/store/shopifyStore";
+import { useShopifyStore } from "../../store/shopifyStore";
+import { useRoute } from "vue-router";
 
 interface ProductGridProps {
   collection: string;
   productsPerRow: number;
   maxProducts: number;
+  price: number;
 }
 
 const props = defineProps<ProductGridProps>();
@@ -49,6 +53,12 @@ const props = defineProps<ProductGridProps>();
 const shopifyStore = useShopifyStore();
 const { isLoading, error } = storeToRefs(shopifyStore);
 const products = ref<any[]>([]);
+
+const apiKey = 'b2253c87fe4d4111ad4211f05e4080bb';
+const model = 'product-card';
+const route = useRoute();
+
+let content: any = null;
 
 // Grid-Styling basierend auf Produkten pro Zeile
 const gridStyle = computed(() => {
@@ -61,9 +71,7 @@ const gridStyle = computed(() => {
 
 // Lade Produkte
 async function loadProducts() {
-  products.value = await shopifyStore.fetchProductsByCollection(
-    props.collection,
-    props.maxProducts
+  products.value = await shopifyStore.fetchProducts(
   );
 }
 

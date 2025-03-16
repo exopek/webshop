@@ -8,14 +8,11 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    
-    "build:tenant1": "node -r dotenv/config ./node_modules/.bin/nuxt build dotenv_config_path=.env.tenant1",
+    "build:vitesse": "node -r dotenv/config ./node_modules/.bin/nuxt build dotenv_config_path=.env.tenant1",
     "build:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt build dotenv_config_path=.env.tenant2",
-    
-    "generate:tenant1": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant1",
+    "generate:vitesse": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant1",
     "generate:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant2",
-    
-    "dev:tenant1": "node -r dotenv/config ./node_modules/.bin/nuxt dev dotenv_config_path=.env.tenant1",
+    "dev:vitesse": "dotenv -e .env.vitesse -- nuxt dev",
     "dev:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt dev dotenv_config_path=.env.tenant2"
   },
   "dependencies": {
@@ -28,6 +25,8 @@
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.13.1",
     "@pinia/nuxt": "^0.10.1",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^8.0.0",
     "pinia": "^3.0.1"
   }
 }

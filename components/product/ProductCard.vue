@@ -1,159 +1,99 @@
 <template>
-    <div :class="['product-card', `product-card--${displayMode}`, `tenant-${tenantId}`]">
-      <div class="product-image" :style="imageStyle">
-        <img :src="product?.featured_image || placeholder" :alt="product?.title" />
-        <span v-if="product?.on_sale && showComparePrice" class="sale-badge">Sale</span>
-      </div>
-      
-      <div class="product-info">
-        <h3 class="product-title">{{ product?.title || 'Product Title' }}</h3>
-        
-        <div v-if="showRating && product?.rating" class="product-rating">
-          <span>★★★★★</span>
-          <span class="rating-number">{{ product?.rating || '4.5' }}</span>
-        </div>
-        
-        <div v-if="showPrice" class="product-price">
-          <span :class="{ 'discounted': product?.on_sale && showComparePrice }">
-            {{ formatPrice(product?.price) }}
-          </span>
-          <span v-if="product?.on_sale && showComparePrice" class="compare-price">
-            {{ formatPrice(product?.compare_at_price) }}
-          </span>
-        </div>
-        
-        <button :class="['add-to-cart', `btn-${buttonStyle}`]">
-          Add to Cart
-        </button>
-      </div>
+    <div class="product-card">
+      <Content 
+        v-if="builderContent" 
+        :content="builderContent" 
+        :data="productData" 
+        :api-key="apiKey" 
+        :model="model"
+      />
     </div>
   </template>
   
   <script setup>
   import { ref, computed, onMounted } from 'vue'
+  import { Content, fetchOneEntry } from '@builder.io/sdk-vue';
   // import { useRuntimeConfig } from 'nuxt/app'
+
+  const builderContent = ref(null);
+  const loadingError = ref(false);
   
   // Props, die über Builder.io definiert werden können
   const props = defineProps({
-    displayMode: {
-      type: String,
-      default: 'standard'
-    },
-    showRating: {
-      type: Boolean,
-      default: true
-    },
-    showPrice: {
-      type: Boolean,
-      default: true
-    },
-    showComparePrice: {
-      type: Boolean,
-      default: true
-    },
-    buttonStyle: {
-      type: String,
-      default: 'primary'
-    },
-    imageAspectRatio: {
-      type: String,
-      default: '1:1'
-    },
-    product: {
-      type: Object,
-      default: null
-    }
-  })
-  
-  // Tenant-spezifische Konfiguration
-  /* const config = useRuntimeConfig()
-  const tenantId = ref(config.public.TENANT_ID) */
-  // const tenantConfig = ref({})
-  
-  // Produktdaten
-  // const product = ref(null)
-  const placeholder = '/images/product-placeholder.jpg'
-  
-  // Berechne CSS für Bildaspektverhältnis
-  const imageStyle = computed(() => {
-    const aspectRatioMap = {
-      '1:1': '100%',
-      '4:3': '75%',
-      '16:9': '56.25%'
-    }
-  
-    return {
-      paddingBottom: aspectRatioMap[props.imageAspectRatio] || '100%'
-    }
-  })
-  
-  // Formatiere Preis basierend auf der Währung des Mandanten
-  /* function formatPrice(price) {
-    if (!price) return '$0.00'
+  // Das Produkt aus dem Grid
+  product: {
+    type: Object,
+    required: true
+  },
+  // Builder.io API-Key
+  apiKey: {
+    type: String,
+    required: true
+  },
+  // Builder.io Modell für die Karte
+  model: {
+    type: String,
+    default: 'product-card'
+  }
+});
+
+const productData = computed(() => {
+  // Füge hier alle Daten hinzu, die in der Builder.io-Karte verwendet werden sollen
+  return {
+    product: props.product,
+    id: props.product.id,
+    title: props.product.title,
+    price: props.product.price,
+    comparePrice: props.product.compare_at_price,
+    onSale: props.product.on_sale,
+    image: props.product.featured_image,
+    // Weitere Produktdaten...
+  };
+});
+
+// Lade die Builder.io-Produktkarte
+async function loadBuilderContent() {
+  try {
+    // Builder.io-Content für die Produktkarte abrufen
+    // Wir verwenden product.id als Target, sodass du produktspezifische Karten erstellen kannst
+    const response = await fetchOneEntry({
+      model: props.model,
+      apiKey: props.apiKey,
+      query: {
+        target: props.isDefault
+      },
+      userAttributes: {
+        isDefault: true
+      },
+      options: {
+        cachebust: true // Verhindert Caching, wichtig für Entwicklung
+      }
+    });
     
-    const currency = tenantConfig.value?.currency || 'USD'
-    const locale = tenantConfig.value?.locale || 'en-US'
+    builderContent.value = response;
     
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency
-    }).format(price)
-  } */
+    // Wenn kein Content gefunden wurde, versuchen wir es mit einer Standard-Karte
+    if (!builderContent.value) {
+      const defaultResponse = await fetchOneEntry({
+        model: props.model,
+        apiKey: props.apiKey,
+        userAttributes: {
+          isDefault: false // Ein Flag für deine Standard-Produktkarte
+        }
+      });
+      
+      builderContent.value = defaultResponse;
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der Builder.io-Produktkarte:', error);
+    loadingError.value = true;
+    emit('error', error);
+  }
+}
   
   // Lade Tenant-Konfiguration und Produktdaten
   onMounted(async () => {
-    // Tenant-Konfiguration laden
-    /* const { loadTenantConfig } = await import('~/utils/tenant-config')
-    tenantConfig.value = await loadTenantConfig() */
+    loadBuilderContent();
   })
   </script>
   
-  <style scoped>
-  /* Basis-Styling für die Produktkarte */
-  .product-card {
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
-  
-  /* Unterschiedliche Display-Modi */
-  .product-card--standard {
-    padding: 16px;
-  }
-  
-  .product-card--compact {
-    padding: 8px;
-  }
-  
-  .product-card--detailed {
-    padding: 24px;
-  }
-  
-  /* Schaltflächen-Stile */
-  .btn-primary {
-    background-color: var(--primary-color, #4a4af4);
-    color: white;
-  }
-  
-  .btn-secondary {
-    background-color: transparent;
-    border: 1px solid var(--primary-color, #4a4af4);
-    color: var(--primary-color, #4a4af4);
-  }
-  
-  .btn-text {
-    background-color: transparent;
-    color: var(--primary-color, #4a4af4);
-    padding: 0;
-    text-decoration: underline;
-  }
-  
-  /* Tenant-spezifische Überschreibungen können hier hinzugefügt werden */
-  .tenant-tenant1 .product-card {
-    --primary-color: #FF5733;
-  }
-  
-  .tenant-tenant2 .product-card {
-    --primary-color: #33FF57;
-  }
-  </style>

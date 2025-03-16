@@ -1,4 +1,6 @@
 <template>
+  
+  <div>
     
     <Content 
     :api-key="apiKey" 
@@ -6,7 +8,15 @@
     :content="content"
     :customComponents="registeredComponents"
      />
+     <template>
+      <div>
+        <CustomFooter api-key='test'/>
+      </div>
+     </template>
+      
   
+   
+  </div>
 </template>
 <script setup>
 import { Content, fetchOneEntry, isPreviewing } from '@builder.io/sdk-vue';

@@ -19,6 +19,11 @@ export const registeredComponents = [
             name: 'maxProducts',
             type: 'number',
             defaultValue: 8
+        },
+        {
+            name: 'price',
+            type: 'number',
+            defaultValue: 0
         }
     ]
     }

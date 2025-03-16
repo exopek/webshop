@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', '@builder.io/sdk-vue/nuxt', '@pinia/nuxt'],
+  nitro: {
+    static: true,
+    preset: 'static'
+  },
   runtimeConfig: {
     public: {
       TENANT_ID: process.env.TENANT_ID || 'default',

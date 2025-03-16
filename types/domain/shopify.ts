@@ -22,3 +22,15 @@ export interface ShopifyProduct {
     shopifyAccessToken: string;
     shopifyApiVersion: string;
   }
+
+  export interface ProductFilterOptions {
+    minPrice?: number;
+    maxPrice?: number;
+    available?: boolean;
+    sortBy?: 'price-asc' | 'price-desc' | 'title-asc' | 'title-desc' | 'created-desc' | 'created-asc';
+    filterQuery?: string; // Suchbegriff für Produkttitel
+    tags?: string[]; // Produkt-Tags
+    productType?: string; // Produkttyp
+    limit?: number;
+    cursor?: string; // für Pagination
+  }
