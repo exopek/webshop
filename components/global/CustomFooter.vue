@@ -1,10 +1,11 @@
 <template>
     <div class="custom-footer">
-      <Content 
-        v-if="builderContent" 
-        :content="builderContent" 
-        :api-key="apiKey" 
-        :model="model"
+      <BuilderComponent 
+      v-if="builderContent"
+      :content="content"
+      :api-key="props.apiKey"
+      :model="props.model"
+      :data="{ ...content.data }"
       />
     </div>
   </template>
@@ -41,6 +42,8 @@ async function loadBuilderContent() {
         cachebust: true // Verhindert Caching, wichtig für Entwicklung
       }
     });
+
+    console.log('Builder.io Footer:', response);
     
     builderContent.value = response;
     
