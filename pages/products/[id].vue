@@ -4,7 +4,7 @@
     <div v-else-if="!product" class="not-found">Produkt nicht gefunden.</div>
     <div v-else>
       <!-- Builder.io Content falls verfügbar -->
-      <Content v-if="builderContent" :api-key="apiKey"
+      <Content :api-key="apiKey"
       model="page-detail" :data = "builderIoData" :customComponents="registeredComponents" :content="builderContent" :context="{
           addToCart,
           selectOption,
@@ -14,19 +14,8 @@
           isOptionValueAvailable
         }"  />
         
-      <!-- Fallback Standard-UI falls kein Builder.io Content -->
-      <ProductDetailsLayout 
-        v-else
-        :product="product"
-        :selectedOptions="selectedOptions"
-        :selectedVariant="selectedVariant"
-        :quantity="quantity"
-        :isLoading="isLoading"
-        @selectOption="selectOption"
-        @incrementQuantity="incrementQuantity"
-        @decrementQuantity="decrementQuantity"
-        @addToCart="addToCart"
-      />
+      
+      
         
       <!-- <Cart :isOpen="isCartOpen"
         @close="isCartOpen = false"/> -->
@@ -126,22 +115,26 @@ async function loadProduct() {
 
 async function loadBuilderContent() {
   try {
-    // Builder.io-Content für die Produktkarte abrufen
-    // Wir verwenden product.id als Target, sodass du produktspezifische Karten erstellen kannst
-    const { data: content } = await useAsyncData('builderData', () =>
-      fetchOneEntry({
-        model,
-        apiKey,
-        userAttributes: {
-          urlPath: route.path,
-        }
-      })
-    );
+    console.log("Loading Builder.io content for:", {
+      model,
+      urlPath: route.path,
+      apiKey
+    });
 
-    console.log("Builder.io Content:", content);
-    console.log("Builder.io Content:", content.value);
+    // Direkter fetchOneEntry Aufruf (ohne useAsyncData wrapper)
+    const content = await fetchOneEntry({
+      model,
+      apiKey,
+      userAttributes: {
+        urlPath: route.path,
+      },
+      options: {
+        cachebust: true
+      }
+    });
 
-    builderContent.value = content.value;
+    console.log("Builder.io Content loaded:", content);
+    builderContent.value = content;
 
   } catch (error) {
     console.error("Fehler beim Laden der Builder.io-Produktkarte:", error);
