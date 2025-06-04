@@ -51,11 +51,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Cart Modal -->
+    <Cart :isOpen="isCartOpen" @close="isCartOpen = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue'
+import { useShopifyCardStore } from '../../store/shopifyCardStore'
+import Cart from '../global/Cart.vue'
 
 const props = defineProps({
   product: {
@@ -80,6 +85,9 @@ const props = defineProps({
   }
 })
 
+// Stores
+const shopifyCardStore = useShopifyCardStore()
+
 // Für Builder.io Context - falls Product nicht als Prop übergeben wird
 const builderState = inject('builderState', null)
 const builderContext = inject('builderContext', null)
@@ -101,6 +109,9 @@ const product = computed(() => {
 const internalSelectedOptions = ref(props.selectedOptions || {})
 const internalQuantity = ref(props.quantity || 1)
 const internalIsLoading = ref(false)
+
+// Cart State
+const isCartOpen = ref(false)
 
 // Computed für selectedVariant
 const selectedVariant = computed(() => {
@@ -140,16 +151,49 @@ function handleDecrementQuantity() {
   emit('decrementQuantity')
 }
 
-function handleAddToCart() {
+async function handleAddToCart() {
   console.log('ProductDetailsLayout: handleAddToCart')
+  
+  if (!product.value) {
+    console.error('Kein Produkt verfügbar')
+    return
+  }
+  
+  // Verfügbarkeit prüfen
+  const isAvailable = selectedVariant.value 
+    ? selectedVariant.value.availableForSale 
+    : product.value.available
+    
+  if (!isAvailable) {
+    console.error('Produkt nicht verfügbar')
+    return
+  }
+  
   internalIsLoading.value = true
   
-  // Hier könnten Sie direkt den Cart Store aufrufen
-  // await shopifyCardStore.addToCart(...)
-  
-  setTimeout(() => {
+  try {
+    // Variant ID bestimmen
+    const variantId = selectedVariant.value?.id || product.value.variant_id
+    
+    console.log('Adding to cart:', {
+      variantId,
+      quantity: internalQuantity.value,
+      product: product.value.title
+    })
+    
+    // Produkt zum Warenkorb hinzufügen
+    await shopifyCardStore.addToCart(variantId, internalQuantity.value)
+    
+    // Cart öffnen
+    isCartOpen.value = true
+    
+    console.log('Successfully added to cart')
+    
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+  } finally {
     internalIsLoading.value = false
-  }, 1000)
+  }
   
   emit('addToCart')
 }
