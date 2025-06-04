@@ -3,9 +3,9 @@
     <div v-if="isLoading" class="loading">Produkt wird geladen...</div>
     <div v-else-if="!product" class="not-found">Produkt nicht gefunden.</div>
     <div v-else>
-      <!-- Hier verwenden wir ein einziges generisches Builder.io-Template -->
+      <!-- Builder.io Content falls verfügbar -->
       <Content v-if="builderContent" :api-key="apiKey"
-      model="page-detail" :data = "builderIoData" :content="builderContent" :context="{
+      model="page-detail" :data = "builderIoData" :customComponents="registeredComponents" :content="builderContent" :context="{
           addToCart,
           selectOption,
           incrementQuantity,
@@ -13,8 +13,23 @@
           formatPrice,
           isOptionValueAvailable
         }"  />
-        <Cart :isOpen="isCartOpen"
-        @close="isCartOpen = false"/>
+        
+      <!-- Fallback Standard-UI falls kein Builder.io Content -->
+      <ProductDetailsLayout 
+        v-else
+        :product="product"
+        :selectedOptions="selectedOptions"
+        :selectedVariant="selectedVariant"
+        :quantity="quantity"
+        :isLoading="isLoading"
+        @selectOption="selectOption"
+        @incrementQuantity="incrementQuantity"
+        @decrementQuantity="decrementQuantity"
+        @addToCart="addToCart"
+      />
+        
+      <!-- <Cart :isOpen="isCartOpen"
+        @close="isCartOpen = false"/> -->
     </div>
     
   </div>
@@ -25,7 +40,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useShopifyStore } from "../../store/shopifyStore";
-import { useRuntimeConfig } from "nuxt/app";
+import { useAsyncData, useRuntimeConfig } from "nuxt/app";
 import { Content, fetchOneEntry, isPreviewing } from "@builder.io/sdk-vue";
 import { useShopifyCardStore } from "../../store/shopifyCardStore";
 import  { registeredComponents } from '../../plugins/builder-components';
@@ -49,6 +64,7 @@ const selectedOptions = ref<Record<string, string>>({});
 const handle = computed(() => route.params.id as string);
 
 const apiKey = "b2253c87fe4d4111ad4211f05e4080bb";
+const model = "page-detail";
 
 // Ausgewählte Variante basierend auf den gewählten Optionen
 const selectedVariant = computed(() => {
@@ -88,7 +104,7 @@ async function loadProduct() {
   try {
     // Produkt aus API laden
     product.value = await shopifyStore.fetchProduct(handle.value);
-    console.log("Product-Details:", product.value);
+    console.log("Product-Details:", product);
     // Standardoptionen auswählen (erste verfügbare Option für jede Option)
     if (product.value && product.value.options) {
       product.value.options.forEach((option: any) => {
@@ -112,26 +128,21 @@ async function loadBuilderContent() {
   try {
     // Builder.io-Content für die Produktkarte abrufen
     // Wir verwenden product.id als Target, sodass du produktspezifische Karten erstellen kannst
-    const response = await fetchOneEntry({
-      model: "page-detail",
-      apiKey: "b2253c87fe4d4111ad4211f05e4080bb",
-      options: {
-        cachebust: true,
-      },
-    
-    });
+    const { data: content } = await useAsyncData('builderData', () =>
+      fetchOneEntry({
+        model,
+        apiKey,
+        userAttributes: {
+          urlPath: route.path,
+        }
+      })
+    );
 
-    builderContent.value = response;
+    console.log("Builder.io Content:", content);
+    console.log("Builder.io Content:", content.value);
 
-    // Wenn kein Content gefunden wurde, versuchen wir es mit einer Standard-Karte
-    if (!builderContent.value) {
-      const defaultResponse = await fetchOneEntry({
-        model: "page-detail",
-        apiKey: "b2253c87fe4d4111ad4211f05e4080bb",
-      });
+    builderContent.value = content.value;
 
-      builderContent.value = defaultResponse;
-    }
   } catch (error) {
     console.error("Fehler beim Laden der Builder.io-Produktkarte:", error);
     loadingError.value = true;

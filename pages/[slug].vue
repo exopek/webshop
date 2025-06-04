@@ -36,9 +36,6 @@ const { data: content } = await useAsyncData('builderData', () =>
     userAttributes: {
       urlPath: route.path,
     },
-    methods: {
-      ...registeredComponents
-    },
   })
 );
 

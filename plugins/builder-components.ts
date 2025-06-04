@@ -3,6 +3,8 @@ import Cart from '~/components/global/Cart.vue'
 import CustomCart from '~/components/global/CustomCart.vue'
 import ProductSlider from '~/components/product/ProductSlider.vue'
 import ProductCard2 from '~/components/product/ProductCard2.vue';
+import ImageSlider from '~/components/global/ImageSlider.vue'
+import ProductDetailsLayout from '~/components/productDetails/ProductDetailsLayout.vue'
 
 type ComponentInput = {
     name: string;
@@ -80,9 +82,51 @@ export const registeredComponents: RegisteredComponent[] = [
         ]
     },
     {
+        component: ImageSlider,
+        name: 'ImageSlider',
+        inputs: [
+            {
+                name: 'images',
+                type: 'Array',
+                defaultValue: []
+            }
+        ]
+    },
+    {
         component: ProductCard2,
         name: 'ProductCard2',
         inputs: [
+        ]
+    },
+    {
+        component: ProductDetailsLayout,
+        name: 'ProductDetailsLayout',
+        inputs: [
+            {
+                name: 'product',
+                type: 'object',
+                defaultValue: null
+            },
+            {
+                name: 'selectedOptions',
+                type: 'object',
+                defaultValue: {}
+            },
+            {
+                name: 'selectedVariant',
+                type: 'object',
+                defaultValue: null
+            },
+            {
+                name: 'quantity',
+                type: 'number',
+                defaultValue: 1
+            },
+            {
+                name: 'isLoading',
+                type: 'boolean',
+                defaultValue: false
+            }
         ]
     }
 ]
