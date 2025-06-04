@@ -1,5 +1,5 @@
 <template>
-  <div class="product-card-wrapper">
+  <div class="product-card-wrapper" :data-on-sale="productData.onSale" :data-available="productData.available">
     <Nuxt-link :to="`/products/${base64ProductId}`" class="product-link">
       <div class="product-card">
         <Content 
@@ -181,58 +181,70 @@ function formatPrice(price) {
   text-decoration: none;
   color: inherit;
   display: block;
+  height: 100%;
 }
 
 .product-card-wrapper {
   position: relative;
-  border-radius: 8px;
+  height: 100%;
+  border-radius: 12px;
   overflow: hidden;
+  background: white;
+  transition: all 0.3s ease;
 }
 
 .product-card {
-  border-radius: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background: white;
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .product-image-container {
   position: relative;
   width: 100%;
-  height: 0;
-  padding-bottom: 133.33%; /* Seitenverhältnis 600:800 (800/600 = 1,3333...) */
+  aspect-ratio: 1;
   overflow: hidden;
+  background: #f8fafc;
 }
 
 .product-image {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
 }
 
 .add-to-cart-button {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 12px 0;
-  background-color: rgba(76, 175, 80, 0.9);
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
   opacity: 0;
-  transform: translateY(100%);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(1rem);
+  backdrop-filter: blur(10px);
 }
 
 .product-image-container:hover .add-to-cart-button {
@@ -241,35 +253,120 @@ function formatPrice(price) {
 }
 
 .add-to-cart-button:hover {
-  background-color: rgba(69, 160, 73, 1);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.add-to-cart-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .product-info {
-  padding: 15px;
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .product-title {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .product-price {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.product-price > span:first-child {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .discounted {
-  color: #e53935;
-  font-weight: 600;
+  color: #dc2626 !important;
 }
 
 .compare-price {
   text-decoration: line-through;
-  color: #999;
-  font-size: 14px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Sale Badge */
+.product-image-container::before {
+  content: 'SALE';
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 10;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.product-card-wrapper[data-on-sale="true"] .product-image-container::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Availability indicator */
+.product-card-wrapper[data-available="false"] {
+  opacity: 0.7;
+}
+
+.product-card-wrapper[data-available="false"] .product-image-container::after {
+  content: 'Ausverkauft';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .product-info {
+    padding: 1rem;
+  }
+  
+  .product-title {
+    font-size: 0.925rem;
+  }
+  
+  .add-to-cart-button {
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
 }
 </style>
   
