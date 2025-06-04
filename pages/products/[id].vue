@@ -17,8 +17,8 @@
       
       
         
-      <!-- <Cart :isOpen="isCartOpen"
-        @close="isCartOpen = false"/> -->
+      <Cart :isOpen="isCartOpen"
+        @close="isCartOpen = false"/>
     </div>
     
   </div>

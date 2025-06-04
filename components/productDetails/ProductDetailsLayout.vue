@@ -39,14 +39,14 @@
         <div class="order-2 lg:order-2">
           <ProductDetailsInfo
             :product="product"
-            :selectedOptions="selectedOptions"
+            :selectedOptions="internalSelectedOptions"
             :selectedVariant="selectedVariant"
-            :quantity="quantity"
-            :isLoading="isLoading"
-            @selectOption="$emit('selectOption', $event)"
-            @incrementQuantity="$emit('incrementQuantity')"
-            @decrementQuantity="$emit('decrementQuantity')"
-            @addToCart="$emit('addToCart')"
+            :quantity="internalQuantity"
+            :isLoading="internalIsLoading"
+            @selectOption="handleSelectOption"
+            @incrementQuantity="handleIncrementQuantity"
+            @decrementQuantity="handleDecrementQuantity"
+            @addToCart="handleAddToCart"
           />
         </div>
       </div>
@@ -97,7 +97,62 @@ const product = computed(() => {
   return null
 })
 
-defineEmits(['selectOption', 'incrementQuantity', 'decrementQuantity', 'addToCart'])
+// Eigene State-Verwaltung für Builder.io Kontext
+const internalSelectedOptions = ref(props.selectedOptions || {})
+const internalQuantity = ref(props.quantity || 1)
+const internalIsLoading = ref(false)
+
+// Computed für selectedVariant
+const selectedVariant = computed(() => {
+  if (!product.value || !product.value.variants) return null
+  
+  return product.value.variants.find((variant) => {
+    return variant.selectedOptions.every((option) => {
+      return internalSelectedOptions.value[option.name] === option.value
+    })
+  })
+})
+
+const emit = defineEmits(['selectOption', 'incrementQuantity', 'decrementQuantity', 'addToCart'])
+
+// Event Handler mit interner State-Verwaltung
+function handleSelectOption(optionName, optionValue) {
+  console.log('ProductDetailsLayout: handleSelectOption', optionName, optionValue)
+  internalSelectedOptions.value[optionName] = optionValue
+  emit('selectOption', optionName, optionValue)
+}
+
+function handleIncrementQuantity() {
+  console.log('ProductDetailsLayout: handleIncrementQuantity')
+  if (selectedVariant.value && internalQuantity.value < selectedVariant.value.quantityAvailable) {
+    internalQuantity.value++
+  } else if (!selectedVariant.value) {
+    internalQuantity.value++
+  }
+  emit('incrementQuantity')
+}
+
+function handleDecrementQuantity() {
+  console.log('ProductDetailsLayout: handleDecrementQuantity')
+  if (internalQuantity.value > 1) {
+    internalQuantity.value--
+  }
+  emit('decrementQuantity')
+}
+
+function handleAddToCart() {
+  console.log('ProductDetailsLayout: handleAddToCart')
+  internalIsLoading.value = true
+  
+  // Hier könnten Sie direkt den Cart Store aufrufen
+  // await shopifyCardStore.addToCart(...)
+  
+  setTimeout(() => {
+    internalIsLoading.value = false
+  }, 1000)
+  
+  emit('addToCart')
+}
 
 // Image slider logic
 const currentImageIndex = ref(0)

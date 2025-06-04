@@ -139,18 +139,22 @@ const isAvailable = computed(() => {
 })
 
 function selectOption(optionName, optionValue) {
+  console.log('ProductDetailsInfo: selectOption called', optionName, optionValue)
   emit('selectOption', optionName, optionValue)
 }
 
 function incrementQuantity() {
+  console.log('ProductDetailsInfo: incrementQuantity called')
   emit('incrementQuantity')
 }
 
 function decrementQuantity() {
+  console.log('ProductDetailsInfo: decrementQuantity called')
   emit('decrementQuantity')
 }
 
 function addToCart() {
+  console.log('ProductDetailsInfo: addToCart called')
   emit('addToCart')
 }
 
