@@ -2,17 +2,6 @@
   <div class="product-card-wrapper" :data-on-sale="productData.onSale" :data-available="productData.available">
     <Nuxt-link :to="`/products/${base64ProductId}`" class="product-link">
       <div class="product-card">
-        <Content 
-          v-if="builderContent" 
-          :content="builderContent" 
-          :data="productData" 
-          :api-key="apiKey" 
-          :model="model"
-          :context="{
-            addToCart,
-          }"
-        />
-        
         <div class="product-image-container">
           <img
             :src="productData.image || 'https://placehold.co/600x800'"
@@ -20,7 +9,7 @@
             class="product-image"
           />
           <!-- Button innerhalb des Containers, aber mit event.stop -->
-          <button @click.stop.prevent="addToCart" class="add-to-cart-button">
+          <button @click.stop.prevent="addToCart" class="add-to-cart-button" :disabled="!productData.available">
             {{addToCartButtonText}}
           </button>
         </div>
@@ -41,33 +30,16 @@
 </template>
   
   <script setup>
-  import { ref, computed, onMounted } from 'vue'
-  import { Content, fetchOneEntry } from '@builder.io/sdk-vue';
+  import { ref, computed } from 'vue'
   import { useShopifyCardStore } from '../../store/shopifyCardStore';
-  // import { useRuntimeConfig } from 'nuxt/app'
 
   const shopifyCardStore = useShopifyCardStore();
-  const builderContent = ref(null);
-  const loadingError = ref(false);
   const isLoading = ref(false);
-  const route = useRoute();
   
-  // Props, die über Builder.io definiert werden können
   const props = defineProps({
-  // Das Produkt aus dem Grid
   product: {
     type: Object,
     required: true
-  },
-  // Builder.io API-Key
-  apiKey: {
-    type: String,
-    required: true
-  },
-  // Builder.io Modell für die Karte
-  model: {
-    type: String,
-    default: 'product-card'
   }
 });
 
@@ -97,45 +69,6 @@ const base64ProductId = computed(() => {
   return btoa(props.product.id);
 });
 
-// Lade die Builder.io-Produktkarte
-async function loadBuilderContent() {
-  try {
-    // Builder.io-Content für die Produktkarte abrufen
-    // Wir verwenden product.id als Target, sodass du produktspezifische Karten erstellen kannst
-    const response = await fetchOneEntry({
-      model: props.model,
-      apiKey: props.apiKey,
-      query: {
-        target: props.isDefault
-      },
-      userAttributes: {
-        isDefault: true
-      },
-      options: {
-        cachebust: true // Verhindert Caching, wichtig für Entwicklung
-      }
-    });
-    
-    builderContent.value = response;
-    
-    // Wenn kein Content gefunden wurde, versuchen wir es mit einer Standard-Karte
-    if (!builderContent.value) {
-      const defaultResponse = await fetchOneEntry({
-        model: props.model,
-        apiKey: props.apiKey,
-        userAttributes: {
-          isDefault: false // Ein Flag für deine Standard-Produktkarte
-        }
-      });
-      
-      builderContent.value = defaultResponse;
-    }
-  } catch (error) {
-    console.error('Fehler beim Laden der Builder.io-Produktkarte:', error);
-    loadingError.value = true;
-    emit('error', error);
-  }
-}
 
 async function addToCart() {
   console.log("In den Warenkorb legen");
@@ -169,11 +102,6 @@ function formatPrice(price) {
     currency: "EUR",
   }).format(price);
 }
-  
-  // Lade Tenant-Konfiguration und Produktdaten
-  onMounted(async () => {
-    loadBuilderContent();
-  })
   </script>
 
 <style scoped>

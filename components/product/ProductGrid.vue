@@ -27,7 +27,7 @@
       </div>
       <div v-else class="products-grid">
         <div v-for="product in filteredProducts" :key="product.id" class="product-item">
-          <ProductCard :product="product" :api-key="apiKey" :model="model" @openCart="openCart"/>
+          <ProductCard :product="product" @openCart="openCart"/>
         </div>
       </div>
     </div>

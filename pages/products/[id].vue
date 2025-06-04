@@ -118,23 +118,67 @@ async function loadBuilderContent() {
     console.log("Loading Builder.io content for:", {
       model,
       urlPath: route.path,
+      productId: handle.value,
       apiKey
     });
 
-    // Direkter fetchOneEntry Aufruf (ohne useAsyncData wrapper)
-    const content = await fetchOneEntry({
-      model,
-      apiKey,
-      userAttributes: {
-        urlPath: route.path,
-      },
-      options: {
-        cachebust: true
-      }
-    });
+    // Versuche verschiedene Strategien für Builder.io Content
+    let content = null;
 
-    console.log("Builder.io Content loaded:", content);
+    // 1. Versuche mit spezifischer URL
+    try {
+      content = await fetchOneEntry({
+        model,
+        apiKey,
+        userAttributes: {
+          urlPath: route.path,
+        },
+        options: {
+          cachebust: true
+        }
+      });
+      console.log("Content with URL targeting:", content);
+    } catch (err) {
+      console.log("URL targeting failed:", err);
+    }
+
+    // 2. Falls kein Content gefunden, versuche ohne URL-Targeting (Standard Template)
+    if (!content) {
+      try {
+        content = await fetchOneEntry({
+          model,
+          apiKey,
+          options: {
+            cachebust: true
+          }
+        });
+        console.log("Content without URL targeting:", content);
+      } catch (err) {
+        console.log("Standard template failed:", err);
+      }
+    }
+
+    // 3. Falls immer noch kein Content, versuche mit Wildcard Pattern
+    if (!content) {
+      try {
+        content = await fetchOneEntry({
+          model,
+          apiKey,
+          userAttributes: {
+            urlPath: '/products/*',
+          },
+          options: {
+            cachebust: true
+          }
+        });
+        console.log("Content with wildcard pattern:", content);
+      } catch (err) {
+        console.log("Wildcard pattern failed:", err);
+      }
+    }
+
     builderContent.value = content;
+    console.log("Final builderContent:", builderContent.value);
 
   } catch (error) {
     console.error("Fehler beim Laden der Builder.io-Produktkarte:", error);
