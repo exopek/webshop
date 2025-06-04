@@ -184,6 +184,17 @@ async function handleAddToCart() {
     // Produkt zum Warenkorb hinzufügen
     await shopifyCardStore.addToCart(variantId, internalQuantity.value)
     
+    // Kurze Wartezeit für Shopify API
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
+    // Cart Daten neu laden
+    try {
+      await shopifyCardStore.getCartData()
+      console.log('Cart refreshed after adding item')
+    } catch (refreshError) {
+      console.error('Error refreshing cart:', refreshError)
+    }
+    
     // Cart öffnen
     isCartOpen.value = true
     

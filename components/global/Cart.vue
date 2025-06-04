@@ -12,8 +12,8 @@
             <h3>Warenkorb</h3>
             <button class="close-button" @click="closeCart">×</button>
           </div>
-          <div v-if="cartData && cartData.items && cartData.items.length > 0" class="cart-items">
-            <div v-for="item in cartData.items" :key="item.id" class="cart-item">
+          <div v-if="(cartData?.items?.length > 0) || (storeCartData?.items?.length > 0)" class="cart-items">
+            <div v-for="item in (cartData?.items || storeCartData?.items || [])" :key="item.id" class="cart-item">
               <div class="cart-item-image" v-if="item.featuredImage">
                 <img :src="item.featuredImage" :alt="item.title" />
               </div>
@@ -27,8 +27,8 @@
           <div v-else class="cart-empty">
             <p>Dein Warenkorb ist leer.</p>
           </div>
-          <div v-if="cartData && cartData.totalAmount > 0" class="cart-total">
-            <p>Gesamtbetrag: {{ formatMoney(cartData.totalAmount) }}</p>
+          <div v-if="(cartData?.totalAmount > 0) || (storeCartData?.totalAmount > 0)" class="cart-total">
+            <p>Gesamtbetrag: {{ formatMoney((cartData?.totalAmount || storeCartData?.totalAmount || 0)) }}</p>
             <button class="checkout-button" @click="goToCheckout">Zur Kasse</button>
           </div>
         </div>
@@ -48,6 +48,9 @@
   const shopifyStore = useShopifyCardStore();
   const cartData = ref<any>(null);
   const isCartOpen = ref(false);
+
+  // Direkte Verwendung der Store-Daten als Alternative
+  const storeCartData = computed(() => shopifyStore.cart);
 
   const props = defineProps({
   isOpen: {
@@ -104,6 +107,14 @@ function closeCart() {
   
   onMounted(async () => {
     await loadCartData();
+  });
+
+  // Watcher für isOpen - lädt Cart-Daten neu wenn Cart geöffnet wird
+  watch(() => props.isOpen, async (newValue) => {
+    if (newValue) {
+      console.log('Cart opened, reloading cart data...');
+      await loadCartData();
+    }
   });
   
   

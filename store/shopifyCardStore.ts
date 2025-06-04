@@ -261,10 +261,10 @@ export const useShopifyCardStore = defineStore('shopifyCardStore', {
         }
         
         // Cart aktualisieren
-        //this.updateCartState(response.data.cartLinesAdd.cart)
+        this.updateCartState(response.data.cartLinesAdd.cart)
       } catch (err) {
         this.error = err instanceof Error ? err : new Error(String(err))
-        //console.error('Error adding to cart:', err)
+        console.error('Error adding to cart:', err)
       } finally {
         this.loading = false
       }
