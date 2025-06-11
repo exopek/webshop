@@ -5,6 +5,7 @@ import ProductSlider from '~/components/product/ProductSlider.vue'
 import ProductCard2 from '~/components/product/ProductCard2.vue';
 import ImageSlider from '~/components/global/ImageSlider.vue'
 import ProductDetailsLayout from '~/components/productDetails/ProductDetailsLayout.vue'
+import Header from '~/components/global/Header.vue'
 
 type ComponentInput = {
     name: string;
@@ -126,6 +127,57 @@ export const registeredComponents: RegisteredComponent[] = [
                 name: 'isLoading',
                 type: 'boolean',
                 defaultValue: false
+            }
+        ]
+    },
+    {
+        component: Header,
+        name: 'Header',
+        inputs: [
+            {
+                name: 'logo',
+                type: 'string',
+                defaultValue: ''
+            },
+            {
+                name: 'siteName',
+                type: 'string',
+                defaultValue: 'My Store'
+            },
+            {
+                name: 'showSearch',
+                type: 'boolean',
+                defaultValue: true
+            },
+            {
+                name: 'showAccount',
+                type: 'boolean',
+                defaultValue: true
+            },
+            {
+                name: 'showCart',
+                type: 'boolean',
+                defaultValue: true
+            },
+            {
+                name: 'cartCount',
+                type: 'number',
+                defaultValue: 0
+            },
+            {
+                name: 'backgroundColor',
+                type: 'string',
+                defaultValue: '#ffffff'
+            },
+            {
+                name: 'textColor',
+                type: 'string',
+                defaultValue: '#1f2937'
+            },
+            {
+                name: 'accentColor',
+                type: 'string',
+                defaultValue: '#3b82f6'
             }
         ]
     }
