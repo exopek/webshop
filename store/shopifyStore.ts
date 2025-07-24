@@ -6,9 +6,20 @@ import type {
   ShopifyProduct,
 } from "~/types/domain/shopify";
 
+export interface ShopifyCollection {
+  id: string;
+  title: string;
+  handle: string;
+  description?: string;
+  image?: string;
+  productsCount?: number;
+}
+
 interface ShopifyState {
   products: Map<string, ShopifyProduct>;
   collections: Map<string, ShopifyProduct[]>;
+  collectionsData: Map<string, ShopifyCollection>;
+  allCollections: ShopifyCollection[];
   isLoading: boolean;
   error: string | null;
 }
@@ -19,6 +30,8 @@ export const useShopifyStore = defineStore("shopifyStore", {
   state: (): ShopifyState => ({
     products: new Map(),
     collections: new Map(),
+    collectionsData: new Map(),
+    allCollections: [],
     isLoading: false,
     error: null,
   }),
@@ -36,6 +49,16 @@ export const useShopifyStore = defineStore("shopifyStore", {
       (collectionHandle: string): ShopifyProduct[] | undefined => {
         return state.collections.get(collectionHandle);
       },
+
+    getCollection:
+      (state) =>
+      (collectionHandle: string): ShopifyCollection | undefined => {
+        return state.collectionsData.get(collectionHandle);
+      },
+
+    getAllCollections: (state): ShopifyCollection[] => {
+      return state.allCollections;
+    },
   },
 
   // Actions
@@ -314,6 +337,112 @@ export const useShopifyStore = defineStore("shopifyStore", {
       return products;
     },
 
+    /**
+     * Holt alle Collections von Shopify
+     */
+    async fetchAllCollections(): Promise<ShopifyCollection[]> {
+      // Prüfen auf Cache-Treffer
+      if (this.allCollections.length > 0) {
+        return this.allCollections;
+      }
+
+      const query = `
+        query getAllCollections($numCollections: Int!) {
+          collections(first: $numCollections) {
+            edges {
+              node {
+                id
+                title
+                handle
+                description
+                image {
+                  url
+                  altText
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await this.shopifyFetch(query, {
+        numCollections: 50,
+      });
+
+      if (!response?.data?.collections?.edges) {
+        return [];
+      }
+
+      const collections = response.data.collections.edges.map(({ node }: any) => {
+        const collection: ShopifyCollection = {
+          id: node.id,
+          title: node.title,
+          handle: node.handle,
+          description: node.description,
+          image: node.image?.url,
+          productsCount: 0, // Note: productsCount not available in Storefront API
+        };
+
+        // Collection auch im Collections-Cache speichern
+        this.collectionsData.set(collection.handle, collection);
+
+        return collection;
+      });
+
+      // Im State speichern
+      this.allCollections = collections;
+
+      return collections;
+    },
+
+    /**
+     * Holt eine spezifische Collection anhand des Handles
+     */
+    async fetchCollection(collectionHandle: string): Promise<ShopifyCollection | null> {
+      // Prüfen auf Cache-Treffer
+      if (this.collectionsData.has(collectionHandle)) {
+        return this.collectionsData.get(collectionHandle) as ShopifyCollection;
+      }
+
+      const query = `
+        query getCollection($collectionHandle: String!) {
+          collection(handle: $collectionHandle) {
+            id
+            title
+            handle
+            description
+            image {
+              url
+              altText
+            }
+          }
+        }
+      `;
+
+      const response = await this.shopifyFetch(query, {
+        collectionHandle,
+      });
+
+      if (!response?.data?.collection) {
+        return null;
+      }
+
+      const collectionData = response.data.collection;
+      const collection: ShopifyCollection = {
+        id: collectionData.id,
+        title: collectionData.title,
+        handle: collectionData.handle,
+        description: collectionData.description,
+        image: collectionData.image?.url,
+        productsCount: 0, // Note: productsCount not available in Storefront API
+      };
+
+      // Im Cache speichern
+      this.collectionsData.set(collectionHandle, collection);
+
+      return collection;
+    },
+
     async fetchProducts(
       options: ProductFilterOptions = {}
     ): Promise<ShopifyProduct[]> {
@@ -372,11 +501,11 @@ export const useShopifyStore = defineStore("shopifyStore", {
           reverse = false;
       }
 
-      // Filter für Verfügbarkeit
-      let availabilityFilter = "";
-      if (available !== undefined) {
-        availabilityFilter = `, availableForSale: ${available}`;
-      }
+      // Filter für Verfügbarkeit (currently unused in this implementation)
+      // let availabilityFilter = "";
+      // if (available !== undefined) {
+      //   availabilityFilter = `, availableForSale: ${available}`;
+      // }
 
       // Filter für Tags
       let tagsFilter = "";
@@ -496,8 +625,8 @@ export const useShopifyStore = defineStore("shopifyStore", {
         return [];
       }
 
-      // Pagination-Informationen extrahieren
-      const pageInfo = response.data.products.pageInfo;
+      // Pagination-Informationen extrahieren (currently unused)
+      // const pageInfo = response.data.products.pageInfo;
 
       // Produktdaten transformieren
       const products = response.data.products.edges.map(({ node }: any) => {
