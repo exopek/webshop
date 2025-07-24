@@ -445,7 +445,7 @@ export const useShopifyCardStore = defineStore('shopifyCardStore', {
           
           return {
             shopifyDomain: config.public.shopify.domain || 'flash-reflex-training.myshopify.com',
-            shopifyAccessToken: config.shopifyAccessToken || '0c54fa2544bf3c6ce9b1fe8d03e79f5e',
+            shopifyAccessToken: config.public.shopifyAccessToken || '0c54fa2544bf3c6ce9b1fe8d03e79f5e',
             shopifyApiVersion: config.public.shopify.apiVersion || '2025-01'
           }
         },

@@ -16,9 +16,10 @@ export default defineNuxtConfig({
       shopify: {
         domain: process.env.SHOPIFY_DOMAIN,
         apiVersion: process.env.SHOPIFY_API_VERSION || '2023-10'
-      }
+      },
+      shopifyAccessToken: process.env.SHOPIFY_ACCESS_TOKEN
     },
     // Private Konfiguration (nur auf dem Server verfügbar)
-    shopifyAccessToken: process.env.SHOPIFY_ACCESS_TOKEN
+    
   },
 })

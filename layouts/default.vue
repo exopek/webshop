@@ -12,6 +12,16 @@
     
     <!-- Page Content -->
     <slot />
+    
+    <!-- Builder.io Footer -->
+    <Content 
+      :model="'footer'" 
+      :content="footer" 
+      :api-key="apiKey" 
+    />
+    
+    <!-- Fallback Footer wenn Builder.io Content nicht verfügbar -->
+    <CustomFooter v-if="!footer || !apiKey" />
   </div>
 </template>
 
@@ -38,6 +48,27 @@ const { data: header } = await useLazyAsyncData('header', async () => {
     })
   } catch (err) {
     console.error('Failed to fetch header from Builder.io:', err)
+    return null
+  }
+})
+
+// Fetch footer content from Builder.io
+const { data: footer } = await useLazyAsyncData('footer', async () => {
+  console.log('Fetching footer from Builder.io...')
+  if (!apiKey) {
+    console.warn('Builder.io API key is not set in runtime config.')
+    return null
+  }
+  try {
+    return await fetchOneEntry({
+      model: 'footer',
+      apiKey: apiKey,
+      options: {
+        includeRefs: true
+      }
+    })
+  } catch (err) {
+    console.error('Failed to fetch footer from Builder.io:', err)
     return null
   }
 })

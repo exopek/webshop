@@ -48,12 +48,15 @@ export const useShopifyStore = defineStore("shopifyStore", {
       const tenantId = config.public.TENANT_ID;
       console.log("Tenant ID:", tenantId);
       console.log("Shopify config:", config.public.shopify);
+      console.log("Shopify Access Token:", config.shopifyAccessToken);
+      console.log("Shopify API Version:", config.public.shopify.apiVersion);
+      console.log("Shopify Domain:", config.public.shopify.domain);
 
       return {
         shopifyDomain:
           config.public.shopify.domain || "flash-reflex-training.myshopify.com",
         shopifyAccessToken:
-          config.shopifyAccessToken || "0c54fa2544bf3c6ce9b1fe8d03e79f5e",
+          config.public.shopifyAccessToken || "0c54fa2544bf3c6ce9b1fe8d03e79f5e",
         shopifyApiVersion: config.public.shopify.apiVersion || "2025-01",
       };
     },
