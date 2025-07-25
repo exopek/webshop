@@ -44,6 +44,18 @@ export const useShopifyStore = defineStore("shopifyStore", {
         return state.products.get(productId);
       },
 
+    getProductByHandle:
+      (state) =>
+      (handle: string): ShopifyProduct | undefined => {
+        // Suche im Cache nach einem Produkt mit dem gegebenen Handle
+        for (const [key, product] of state.products) {
+          if (product.handle === handle) {
+            return product;
+          }
+        }
+        return undefined;
+      },
+
     getProductsByCollection:
       (state) =>
       (collectionHandle: string): ShopifyProduct[] | undefined => {
@@ -223,6 +235,102 @@ export const useShopifyStore = defineStore("shopifyStore", {
 
       // Im Cache speichern
       this.products.set(productId, product);
+
+      return product;
+    },
+
+    /**
+     * Holt ein einzelnes Produkt anhand seines Handles
+     */
+    async fetchProductByHandle(handle: string): Promise<ShopifyProduct | null> {
+      // Für direkte URL-Aufrufe: Immer API-Call machen
+      // Cache-Check optional - wird überschrieben falls nicht gefunden
+
+      // GraphQL-Abfrage für ein einzelnes Produkt anhand des Handles
+      const query = `
+        query getProductByHandle($handle: String!) {
+          productByHandle(handle: $handle) {
+            id
+            title
+            description
+            handle
+            featuredImage {
+              url
+              altText
+            }
+            images(first: 10) {
+                edges {
+                  node {
+                    url
+                    altText
+                    width
+                    height
+                  }
+                }
+            }
+            priceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            compareAtPriceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            variants(first: 5) {
+              edges {
+                node {
+                  id
+                  title
+                  availableForSale
+                  price {
+                    amount
+                    currencyCode
+                  }
+                  image {
+                    url
+                    altText
+                    width
+                    height
+                  }
+                  compareAtPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
+            }  
+          }
+        }
+      `;
+      
+      const response = await this.shopifyFetch(query, { handle });
+      
+      if (!response?.data?.productByHandle) {
+        return null;
+      }
+
+      // Transformieren der Produktdaten in ein einfacheres Format
+      const shopifyProduct = response.data.productByHandle;
+
+      const product: ShopifyProduct = {
+        id: shopifyProduct.id,
+        variant_id: shopifyProduct.variants.edges[0]?.node.id,
+        title: shopifyProduct.title,
+        description: shopifyProduct.description,
+        handle: shopifyProduct.handle,
+        featured_image: shopifyProduct.featuredImage?.url,
+        on_sale: false,
+        available: shopifyProduct.variants.edges[0]?.node.availableForSale || false,
+        price: parseFloat(shopifyProduct.variants.edges[0]?.node.price.amount || 0),
+        images: shopifyProduct.images.edges.map((edge: any) => edge.node.url),
+      };
+
+      // Im Cache speichern (verwende ID als Key für Konsistenz)
+      this.products.set(product.id, product);
 
       return product;
     },

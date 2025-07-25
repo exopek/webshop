@@ -1,6 +1,6 @@
 <template>
     <div class="product-card-wrapper">
-      <Nuxt-link :to="`/products/${base64ProductId}`" class="product-link">
+      <Nuxt-link :to="`/products/${props.product.handle}`" class="product-link">
         <div class="product-card">
           <div class="product-image-container">
             <img
@@ -82,9 +82,7 @@
     return isLoading.value ? 'Adding...' : props.product.available ? 'Add to Cart' : 'Out of Stock';
   });
   
-  const base64ProductId = computed(() => {
-    return btoa(props.product.id);
-  });
+  // Removed: base64ProductId - now using handle directly
   
   async function addToCart() {
     console.log("In den Warenkorb legen");

@@ -82,17 +82,15 @@ const builderIoData = computed(() => {
   };
 });
 
-const base64ProductId = computed(() => {
-  return btoa(product.value.id);
-});
+// Removed: base64ProductId - now using handle directly
 
 // Produkt laden
 async function loadProduct() {
   isLoading.value = true;
 
   try {
-    // Produkt aus API laden
-    product.value = await shopifyStore.fetchProduct(handle.value);
+    // Produkt aus API laden (verwende Handle statt ID)
+    product.value = await (shopifyStore as any).fetchProductByHandle(handle.value);
     console.log("Product-Details:", product);
     // Standardoptionen auswählen (erste verfügbare Option für jede Option)
     if (product.value && product.value.options) {
