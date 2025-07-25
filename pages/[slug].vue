@@ -25,7 +25,9 @@ import { ref } from 'vue';
 
 const route = useRoute();
 
-const apiKey = 'b2253c87fe4d4111ad4211f05e4080bb';
+const config = useRuntimeConfig();
+const apiKey = config.public.BUILDER_API_KEY;
+
 const canShowContent = ref(false);
 const model = 'page';
 

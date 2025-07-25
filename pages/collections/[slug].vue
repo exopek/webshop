@@ -110,6 +110,7 @@ import { useRoute } from 'vue-router'
 import { useShopifyStore } from '../../store/shopifyStore'
 import { Content, fetchOneEntry } from '@builder.io/sdk-vue'
 import { registeredComponents } from '../../plugins/builder-components'
+import { useRuntimeConfig } from 'nuxt/app'
 
 // Route und Store
 const route = useRoute()
@@ -127,7 +128,8 @@ const error = ref<string | null>(null)
 const slug = computed(() => route.params.slug as string)
 
 // Builder.io Konfiguration
-const apiKey = 'b2253c87fe4d4111ad4211f05e4080bb'
+const config = useRuntimeConfig()
+const apiKey = config.public.BUILDER_API_KEY as string
 const model = 'collection-page'
 
 // Builder.io Daten f�r Template

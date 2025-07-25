@@ -61,6 +61,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useShopifyStore } from '../../store/shopifyStore'
 import { Content, fetchOneEntry } from '@builder.io/sdk-vue'
 import { registeredComponents } from '../../plugins/builder-components'
+import { useRuntimeConfig } from 'nuxt/app'
 
 // Store und Daten
 const shopifyStore = useShopifyStore()
@@ -70,7 +71,8 @@ const isLoading = ref(true)
 const error = ref<string | null>(null)
 
 // Builder.io Konfiguration
-const apiKey = 'b2253c87fe4d4111ad4211f05e4080bb'
+const config = useRuntimeConfig()
+const apiKey = config.public.BUILDER_API_KEY as string
 const model = 'collections-overview'
 
 // Builder.io Daten f�r Template

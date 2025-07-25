@@ -52,7 +52,7 @@ const selectedOptions = ref<Record<string, string>>({});
 // Produkt-Handle aus der Route
 const handle = computed(() => route.params.id as string);
 
-const apiKey = "b2253c87fe4d4111ad4211f05e4080bb";
+const apiKey = config.public.BUILDER_API_KEY as string;
 const model = "page-detail";
 
 // Ausgewählte Variante basierend auf den gewählten Optionen
