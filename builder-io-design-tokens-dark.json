@@ -1,0 +1,58 @@
+{
+  "tokens": {
+    "colors": {
+      "primary": {
+        "50": "#1e1b4b",
+        "100": "#312e81",
+        "200": "#3730a3",
+        "300": "#4338ca",
+        "400": "#4f46e5",
+        "500": "#6366f1",
+        "600": "#7c3aed",
+        "700": "#8b5cf6",
+        "800": "#a855f7",
+        "900": "#c084fc",
+        "950": "#ddd6fe"
+      },
+      "background": {
+        "primary": "#0f172a",
+        "secondary": "#1e293b",
+        "tertiary": "#334155"
+      },
+      "text": {
+        "primary": "#f1f5f9",
+        "secondary": "#cbd5e1",
+        "tertiary": "#94a3b8",
+        "link": "#6366f1",
+        "linkHover": "#7c3aed"
+      },
+      "border": {
+        "primary": "#334155",
+        "secondary": "#475569",
+        "focus": "#6366f1"
+      }
+    },
+    "components": {
+      "card": {
+        "background": "#1e293b",
+        "border": "#334155",
+        "shadow": "0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3)"
+      },
+      "header": {
+        "background": "#0f172a",
+        "border": "#334155"
+      },
+      "footer": {
+        "background": "#020617",
+        "text": "#e2e8f0"
+      }
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-25T10:00:00Z",
+    "theme": "dark-purple",
+    "author": "Design System Team",
+    "description": "Dunkles Theme mit violetten Akzenten für moderne Webshops"
+  }
+}

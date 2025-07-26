@@ -5,7 +5,7 @@
     <div v-else>
       <!-- Builder.io Content falls verfügbar -->
       <Content :api-key="apiKey"
-      model="page-detail" :data = "builderIoData" :customComponents="registeredComponents" :content="builderContent" :context="{
+      model="page" :data = "builderIoData" :customComponents="registeredComponents" :content="builderContent" :context="{
           addToCart,
           selectOption,
           incrementQuantity,
@@ -53,7 +53,7 @@ const selectedOptions = ref<Record<string, string>>({});
 const handle = computed(() => route.params.id as string);
 
 const apiKey = config.public.BUILDER_API_KEY as string;
-const model = "page-detail";
+const model = "page";
 
 // Ausgewählte Variante basierend auf den gewählten Optionen
 const selectedVariant = computed(() => {
@@ -92,6 +92,7 @@ async function loadProduct() {
     // Produkt aus API laden (verwende Handle statt ID)
     product.value = await (shopifyStore as any).fetchProductByHandle(handle.value);
     console.log("Product-Details:", product);
+    console.log("Selected Options:", product.value.options);
     // Standardoptionen auswählen (erste verfügbare Option für jede Option)
     if (product.value && product.value.options) {
       product.value.options.forEach((option: any) => {
@@ -103,6 +104,10 @@ async function loadProduct() {
           }
         }
       });
+    } else {
+      console.log("Keine Optionen für das Produkt gefunden.");
+      console.log("Produkt-Details:", product.value);
+      selectedOptions.value[product.value.name] = product.value;
     }
   } catch (error) {
     console.error("Error loading product:", error);

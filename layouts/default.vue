@@ -5,6 +5,7 @@
       :model="'header'" 
       :content="header" 
       :api-key="apiKey" 
+      :data="designTokensData"
     />
     
     <!-- Fallback Header wenn Builder.io Content nicht verfügbar -->
@@ -18,10 +19,11 @@
       :model="'footer'" 
       :content="footer" 
       :api-key="apiKey" 
+      :data="designTokensData"
     />
     
     <!-- Fallback Footer wenn Builder.io Content nicht verfügbar -->
-    <CustomFooter v-if="!footer || !apiKey" />
+    <Footer v-if="!footer || !apiKey" />
   </div>
 </template>
 
@@ -30,6 +32,9 @@ import { Content, fetchOneEntry } from '@builder.io/sdk-vue'
 
 const config = useRuntimeConfig()
 const apiKey = config.public.BUILDER_API_KEY
+
+// Design Tokens laden und bereitstellen
+const { designTokensData } = useDesignTokens()
 
 // Fetch header content from Builder.io
 const { data: header } = await useLazyAsyncData('header', async () => {
