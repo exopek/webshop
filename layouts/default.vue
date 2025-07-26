@@ -23,7 +23,7 @@
     />
     
     <!-- Fallback Footer wenn Builder.io Content nicht verfügbar -->
-    <Footer v-if="!footer || !apiKey" />
+    <!-- <Footer v-if="!footer || !apiKey" /> -->
   </div>
 </template>
 

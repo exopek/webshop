@@ -42,7 +42,7 @@
             
             <div class="collection-info">
               <h3>{{ collection.title }}</h3>
-              <p v-if="collection.description" class="description">
+              <p v-if="collection.description" class="description text-xs text-primary">
                 {{ collection.description }}
               </p>
               <span class="product-count">
@@ -216,9 +216,6 @@ onMounted(async () => {
 
 .description {
   margin: 0 0 1rem 0;
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

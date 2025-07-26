@@ -8,11 +8,7 @@
     :content="content"
     :customComponents="registeredComponents"
      />
-     <template>
-      <div>
-        <CustomFooter api-key='test'/>
-      </div>
-     </template>
+    
       
   
    

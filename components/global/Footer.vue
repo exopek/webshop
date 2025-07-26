@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-primary text-tertiary">
+  <footer class="footer">
     <div class="footer-container">
       <!-- Main Footer Content -->
       <div class="footer-main">
@@ -135,19 +135,8 @@ const props = defineProps({
     default: 'Alle Rechte vorbehalten.'
   },
   
-  // Styling
-  backgroundColor: {
-    type: String,
-    default: '#1f2937'
-  },
-  textColor: {
-    type: String,
-    default: '#f9fafb'
-  },
-  accentColor: {
-    type: String,
-    default: '#3b82f6'
-  }
+  // Note: Styling wird jetzt über Design Tokens gehandhabt
+  // backgroundColor, textColor, accentColor sind durch CSS Custom Properties ersetzt
 })
 
 const emit = defineEmits(['newsletter-submit'])
@@ -253,8 +242,8 @@ const handleNewsletterSubmit = async () => {
 
 <style scoped>
 .footer {
-  background: var(--color-background-primary);
-  color: v-bind(textColor);
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-100);
   margin-top: auto;
 }
 
@@ -290,9 +279,9 @@ const handleNewsletterSubmit = async () => {
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: v-bind(textColor);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-100);
 }
 
 .footer-description {
@@ -312,17 +301,17 @@ const handleNewsletterSubmit = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--size-10);
+  height: var(--size-10);
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  color: v-bind(textColor);
+  border-radius: var(--border-radius-full);
+  color: var(--color-neutral-100);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all var(--transition-duration-300) var(--transition-timing-in-out);
 }
 
 .social-link:hover {
-  background: v-bind(accentColor);
+  background: var(--color-primary-500);
   transform: translateY(-2px);
 }
 
@@ -333,12 +322,12 @@ const handleNewsletterSubmit = async () => {
 
 /* Navigation Sections */
 .section-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: v-bind(textColor);
-  margin: 0 0 1rem 0;
-  border-bottom: 2px solid v-bind(accentColor);
-  padding-bottom: 0.5rem;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-100);
+  margin: 0 0 var(--space-4) 0;
+  border-bottom: 2px solid var(--color-primary-500);
+  padding-bottom: var(--space-2);
 }
 
 .section-links {
@@ -351,15 +340,15 @@ const handleNewsletterSubmit = async () => {
 }
 
 .section-link {
-  color: #9ca3af;
+  color: var(--color-neutral-400);
   text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.2s ease;
-  line-height: 1.5;
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-duration-200) var(--transition-timing-in-out);
+  line-height: var(--line-height-normal);
 }
 
 .section-link:hover {
-  color: v-bind(accentColor);
+  color: var(--color-primary-500);
 }
 
 /* Newsletter Section */
@@ -390,14 +379,14 @@ const handleNewsletterSubmit = async () => {
 
 .newsletter-input {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: var(--space-3) var(--space-4);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: v-bind(textColor);
-  font-size: 0.875rem;
+  border-radius: var(--border-radius-lg);
+  color: var(--color-neutral-100);
+  font-size: var(--font-size-sm);
   outline: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-duration-200) var(--transition-timing-in-out);
 }
 
 .newsletter-input::placeholder {
@@ -405,26 +394,26 @@ const handleNewsletterSubmit = async () => {
 }
 
 .newsletter-input:focus {
-  border-color: v-bind(accentColor);
+  border-color: var(--color-primary-500);
   background: rgba(255, 255, 255, 0.15);
 }
 
 .newsletter-btn {
-  padding: 0.75rem;
-  background: v-bind(accentColor);
+  padding: var(--space-3);
+  background: var(--color-primary-500);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-duration-200) var(--transition-timing-in-out);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 3rem;
+  min-width: var(--size-12);
 }
 
 .newsletter-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, v-bind(accentColor) 90%, black);
+  background: var(--color-primary-600);
   transform: translateY(-1px);
 }
 
