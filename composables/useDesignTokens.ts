@@ -367,12 +367,17 @@ export const useDesignTokens = () => {
         state.value.builderTokens = builderTokens.tokens || {}
         state.value.lastUpdated = new Date()
         
-        console.log('Design tokens loaded successfully:', builderTokens)
+        console.log('🚀 Design tokens loaded successfully:', {
+          rawData: content.data,
+          extractedTokens: builderTokens.tokens,
+          hasColors: !!(builderTokens.tokens?.colors),
+          primaryColors: builderTokens.tokens?.colors?.primary
+        })
         
         // CSS Custom Properties aktualisieren
         applyTokensToCSS()
       } else {
-        console.log('No design tokens found in Builder.io')
+        console.log('❌ No design tokens found in Builder.io - content:', content)
       }
     } catch (error) {
       console.error('Error loading design tokens from Builder.io:', error)
@@ -389,13 +394,21 @@ export const useDesignTokens = () => {
     const mergedTokens = getCurrentTokens()
     const root = document.documentElement
 
+    console.log('🎨 Applying design tokens to CSS:', {
+      hasBuilderTokens: !!state.value.builderTokens,
+      mergedTokens: mergedTokens,
+      builderTokens: state.value.builderTokens
+    })
+
     // Colors
     if (mergedTokens.colors) {
+      console.log('Applying colors:', mergedTokens.colors)
       applyColorTokens(root, mergedTokens.colors)
     }
 
     // Typography
     if (mergedTokens.typography) {
+      console.log('Applying typography:', mergedTokens.typography)
       applyTypographyTokens(root, mergedTokens.typography)
     }
 
@@ -434,6 +447,13 @@ export const useDesignTokens = () => {
       applyComponentTokens(root, mergedTokens.components)
     }
 
+    // Debug: Log was tatsächlich auf das DOM angewendet wurde
+    const appliedValues = {
+      primary500: root.style.getPropertyValue('--color-primary-500'),
+      background: root.style.getPropertyValue('--color-background-primary'),
+      textPrimary: root.style.getPropertyValue('--color-text-primary')
+    }
+    console.log('✅ Applied CSS values:', appliedValues)
     console.log('Design tokens applied to CSS custom properties')
   }
 
@@ -441,11 +461,16 @@ export const useDesignTokens = () => {
    * Color Tokens anwenden
    */
   function applyColorTokens(root: HTMLElement, colors: any): void {
+    console.log('🎨 applyColorTokens called with:', colors)
+    
     // Primary Colors
     if (colors.primary) {
+      console.log('Setting primary colors:', colors.primary)
       Object.entries(colors.primary).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          root.style.setProperty(`--color-primary-${key}`, value as string)
+          const cssProperty = `--color-primary-${key}`
+          console.log(`Setting ${cssProperty} = ${value}`)
+          root.style.setProperty(cssProperty, value as string)
         }
       })
     }
@@ -665,12 +690,27 @@ export const useDesignTokens = () => {
     const defaultTokens = state.value.defaultTokens
     const builderTokens = state.value.builderTokens
 
+    console.log('🔄 getCurrentTokens called:', {
+      hasDefaultTokens: !!defaultTokens,
+      hasBuilderTokens: !!builderTokens,
+      builderTokensKeys: builderTokens ? Object.keys(builderTokens) : [],
+      builderColors: builderTokens?.colors
+    })
+
     if (!builderTokens) {
+      console.log('⚠️ No builder tokens, returning defaults')
       return defaultTokens
     }
 
     // Deep merge der Tokens
-    return mergeDeep(defaultTokens, builderTokens) as DesignTokens
+    const merged = mergeDeep(defaultTokens, builderTokens) as DesignTokens
+    console.log('🔀 Merged tokens result:', {
+      hasColors: !!merged.colors,
+      primaryColors: merged.colors?.primary,
+      mergedPrimary500: merged.colors?.primary?.[500]
+    })
+    
+    return merged
   }
 
   /**
