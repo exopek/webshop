@@ -16,7 +16,9 @@
     "generate:vitesse": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant1",
     "generate:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt generate dotenv_config_path=.env.tenant2",
     "dev:vitesse": "dotenv -e .env.vitesse -- nuxt dev",
-    "dev:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt dev dotenv_config_path=.env.tenant2"
+    "dev:tenant2": "node -r dotenv/config ./node_modules/.bin/nuxt dev dotenv_config_path=.env.tenant2",
+    "tokens:generate": "node build-scripts/generateTokens.mjs",
+    "tokens:dev": "node build-scripts/generateTokens.mjs && npm run dev"
   },
   "dependencies": {
     "@builder.io/sdk-vue": "^4.0.3",

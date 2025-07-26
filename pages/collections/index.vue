@@ -42,7 +42,7 @@
             
             <div class="collection-info">
               <h3>{{ collection.title }}</h3>
-              <p v-if="collection.description" class="description text-xs text-primary">
+              <p v-if="collection.description" class="description text-xl text-primary">
                 {{ collection.description }}
               </p>
               <span class="product-count">
