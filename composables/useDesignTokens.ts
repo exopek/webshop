@@ -712,6 +712,10 @@ export const useDesignTokens = () => {
   // Initial load
   onMounted(() => {
     if (typeof window !== 'undefined') {
+      // Immer zuerst die Default Tokens anwenden
+      applyTokensToCSS()
+      
+      // Dann versuchen Builder.io Tokens zu laden
       loadBuilderTokens()
     }
   })
